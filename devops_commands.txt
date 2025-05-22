@@ -1,0 +1,73 @@
+Docker Isolated  Networks
+
+*** CLEAN PREVIOUS SETUP
+
+>>>>>>>>>>>docker stop containerA containerB containerC
+
+>>>>>>>>>>>docker rm containerA containerB containerC
+
+>>>>>>>>>>>docker network rm net_app net_isolated
+
+******STEP 1: CREATE CUSTOM NETWORKS
+
+>>>>>>>>>>>docker network create net_app
+
+>>>>>>>>>>>docker network create net_isolated
+((net_app – for A & B (shared network)))
+((net_isolated – for container C (private)))
+
+*******STEP 2: RUN CONTAINERS AND ASSIGN TO NETWORKS
+[[Run containerA in net_app]]
+>>>>>>>>>>>docker run -dit --name containerA --network net_app alpine sh
+
+[[Run containerB in net_app]]
+>>>>>>>>>>>docker run -dit --name containerB --network net_app alpine sh
+
+[[Run containerC in net_isolated]]
+>>>>>>>>>>>>docker run -dit --name containerC --network net_isolated alpine sh
+
+
+***********STEP 3: TEST NETWORK CONNECTIVITY
+
+((To execute))
+
+$$$$$$$$$$Enter containerA
+
+>>>>>>>>>docker exec -it containerA sh
+
+>>>>>>>>>>ping containerB  ///# ✅ Should work
+
+
+>>>>>>>>>>>ping containerC  ///# ❌ Should NOT work
+
+******(exit) command to get back
+
+$$$$$$$$$$$Enter ContainerB
+
+>>>>>>>>>>>>>docker exec -it containerB sh
+
+>>>>>>>>>>>>ping containerA  ///# ✅ Should work
+
+$$$$$$$$$$$$Enter containerC
+
+>>>>>>>>>>>>>>docker exec -it containerC sh
+
+>>>>>>>>>>>>>>ping containerA  /////# ❌ Should NOT work
+
+>>>>>>>>>>>>>>ping containerB  /////# ❌ Should NOT work
+
+*************STEP 4: (OPTIONAL) CONNECT containerC TO net_app
+
+((If you want to allow containerC to communicate with A and B, connect it manually:))
+
+>>>>>>>>>docker network connect net_app containerC
+
+>>>>>>>>>>docker exec -it containerC sh
+
+>>>>>>>>>>>ping containerA  /////# ✅ Should now work
+
+>>>>>>>>>>>ping containerB  /////# ✅ Should now work
+
+
+
+
